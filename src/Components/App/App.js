@@ -4,7 +4,7 @@ import SearchBar from '../SearchBar/SearchBar';
 import SearchResults from '../SearchResults/SearchResults';
 import Playlist from '../Playlist/Playlist';
 
-import {Spotify} from '../../util/Spotify';
+import Spotify from '../../util/Spotify';
 
 import './App.css';
 
@@ -12,47 +12,9 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      searchResults: [
-        {
-          name: 'name1',
-          artist: 'artist1',
-          album: 'album1',
-          id: '1'
-        },
-        {
-          name: 'name2',
-          artist: 'artist2',
-          album: 'album2',
-          id: '2'
-        },
-        {
-          name: 'name3',
-          artist: 'artist3',
-          album: 'album3',
-          id: '3'
-        }
-      ],
+      searchResults: [],
       playlistName: 'My Play List Name',
-      playlistTracks: [
-        {
-          name: 'playlistname1',
-          artist: 'playlistartist1',
-          album: 'playlistalbum1',
-          id: '4'
-        },
-        {
-          name: 'playlistname12',
-          artist: 'playlistartist2',
-          album: 'playlistalbum2',
-          id: '5'
-        },
-        {
-          name: 'playlistname3',
-          artist: 'playlistartist3',
-          album: 'playlistalbum3',
-          id: '6'
-        }
-      ]
+      playlistTracks: []
     }
     this.addTrack = this.addTrack.bind(this);
     this.removeTrack = this.removeTrack.bind(this);
@@ -81,25 +43,32 @@ class App extends React.Component {
     this.setState({ playlistName: name });
   }
 
-  savePlaylist() {
-    // eslint-disable-next-line no-unused-vars
-    const trackUris = this.state.playlistTracks.map(track => {
-      return track.uri;
+  search(term) {
+    Spotify.search(term).then(searchResults => {
+      // updates state from Sporify.search() promise
+      this.setState({ searchResults: searchResults })
     })
   }
 
-  search(term) {
-    Spotify.search(term).then(searchResults => {
-      this.setState({searchResults: searchResults})
+  savePlaylist() {
+    // eslint-disable-next-line no-unused-vars
+    const trackUris = this.state.playlistTracks.map(track => track.uri);
+
+    Spotify.savePlaylist(this.state.playlistName, trackUris).then(() => {
+      this.setState({
+        playlistName: 'New Playlist',
+        playlistTracks: []
+      })
     })
   }
+
 
   render() {
     return (
       <div>
         <h1>Ja<span className="highlight">mmm</span>ing</h1>
         <div className="App">
-          <SearchBar onSearch={this.search}/>
+          <SearchBar onSearch={this.search} />
           <div className="App-playlist">
             <SearchResults
               searchResults={this.state.searchResults}
